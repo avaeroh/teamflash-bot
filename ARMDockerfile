@@ -1,5 +1,4 @@
-FROM node:18-alpine
-ENV NODE_ENV=production
+FROM node:18-buster-slim
 
 # syntax=docker/dockerfile:1
 
@@ -9,13 +8,13 @@ WORKDIR /app
 RUN chown -R node:node /app
 COPY --chown=node:node . .
 
-RUN npm install typescript -g
+RUN npm install typescript
 
 USER node
 
 COPY ["package.json", "package-lock.json*", "./"]
 
-
-RUN npm run build &&\
+RUN npm install mongodb@3.0.4&&\
+    npm run build &&\
     npm run deploy
 CMD ["npm", "start"]

@@ -3,7 +3,7 @@ version: '3.1'
 services:
   db:
     container_name: mongoDB
-    image: mongo:4.2.1
+    image: ${MONGODB_IMAGE:-mongo:4.2.1}
     restart: always
     volumes:
       - ./data:${HOME}/data/db
@@ -13,10 +13,10 @@ services:
       - 27017:27017
 
   mongo-express:
-    image: mongo-express
+    image: ${MONGOEXPRESS_IMAGE:-mongo-express}
     container_name: mexpress
     environment:
-      - ME_CONFIG_MONGODB_URL=${MONGO_URI}
+      - ME_CONFIG_MONGODB_URL=${MONGO_URI:-mongodb://localhost:27017}
       - ME_CONFIG_BASICAUTH_USERNAME=mexpress
       - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
     links:
@@ -30,12 +30,13 @@ services:
   teamflash-bot:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ${ARMDockerfile:-Dockerfile}
     restart: unless-stopped
     ports:
       - '3000:3000'
     depends_on:
       - db
-
+    links:
+      - db
 volumes:
   data:
