@@ -2,12 +2,24 @@
 
 ### setup
 
+You will need [ASDF]("https://asdf-vm.com/manage/configuration.html"), which manages the runtimes versions.
+
+- `asdf install`
+- configure your `.env` file based on OS.
+- Structure:
+
+  ```env
+    BOT_TOKEN=<token>
+  CLIENT_ID=<id>
+  MONGO_URI=mongodb://<localhost*>:27017
+  ```
+
 #### MONGO_URI, Mongo Express,
- 
-##### Windows & WSL
+
+##### \*Windows & WSL
 
 - If you are running Mongo on WSL, set MONGO_URI to `mongodb://localhost:27017` in `.env`
-- If you are wanting to run MongoExpress, you will need to be more specific and use `mongodb://172.20.22.225:27017` for Express to connect. You can use `http://172.20.22.225:8081/` in your Windows browser to view MongoExpress.
+- If you are wanting to run MongoExpress, you will need to be more specific and use `mongodb://172.20.22.225:27017` for Express to connect. You can use `http://172.20.22.225:8081` in your Windows browser to view MongoExpress.
 
 ##### Mac
 
