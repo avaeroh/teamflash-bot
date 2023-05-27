@@ -1,19 +1,6 @@
 version: '3.1'
 
 services:
-  # app:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   environment:
-  #     - NODE_ENV=production
-  #   working_dir: /app
-  #   user: node
-  #   volumes:
-  #     - .:/app
-  #   command: npm start
-  #   depends_on:
-  #     - db
   db:
     container_name: mongoDB
     image: mongo:4.2.1
@@ -24,6 +11,7 @@ services:
       - MONGO_INITDB_DATABASE=numberwang
     ports:
       - 27017:27017
+
   mongo-express:
     image: mongo-express
     container_name: mexpress
@@ -38,5 +26,16 @@ services:
       - '8081:8081'
     depends_on:
       - db
+
+  teamflash-bot:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - '3000:3000'
+    depends_on:
+      - db
+
 volumes:
   data:

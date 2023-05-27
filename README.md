@@ -1,18 +1,25 @@
 ## Run via Docker
 
-### setup
+run `docker-compose up`. By default this includes:
+    - teamflash-bot
+    - MongoDB
+    - MongoExpress
+
+### Running locally
+
+- Note that the DB is only supported through `docker-compose`. Only the node app can be run locally.
 
 You will need [ASDF]("https://asdf-vm.com/manage/configuration.html"), which manages the runtimes versions.
 
 - `asdf install`
-- configure your `.env` file based on OS.
+- configure your `.env` file based on OS (mostly just when using WSL, else hostnames are probably just probably localhost)
 - Structure:
-
   ```env
     BOT_TOKEN=<token>
   CLIENT_ID=<id>
   MONGO_URI=mongodb://<localhost*>:27017
   ```
+-
 
 #### MONGO_URI, Mongo Express,
 
@@ -24,10 +31,6 @@ You will need [ASDF]("https://asdf-vm.com/manage/configuration.html"), which man
 ##### Mac
 
 I'd guess `MONGO_URI=mongodb://localhost:27017` is fine?
-
-run all services `docker-compose up`
-build `docker-build -t teamflash-bot .`
-run `docker run teamflash-bot`
 
 ## Boilerplate Readme
 
