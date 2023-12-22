@@ -65,6 +65,7 @@ export async function playFromYoutubeURL(
       }
       const removedSong = queue.removeSong(indexToRemove - 1);
       if (indexToRemove === 1) {
+        //need to fix this - skipping current song does not terminate the stream
         playNextSong(interaction, connection, queue);
       }
 
