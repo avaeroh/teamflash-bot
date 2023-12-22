@@ -33,7 +33,7 @@ export async function playFromYoutubeURL(
       if (queue.isEmpty() || queue.getQueue().length === 1) {
         playNextSong(interaction, connection, queue);
         interaction.reply({
-          content: `Now playing: '${title} as requested by ${interaction.user.username}'`,
+          content: `Now playing: '${title}' as requested by ${interaction.user.username}`,
           ephemeral: true,
         });
       } else {

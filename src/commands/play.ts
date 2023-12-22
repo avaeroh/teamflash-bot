@@ -94,38 +94,51 @@ const playCommand: ICommand = {
       const initialReply = await interaction.deferReply({ ephemeral: true });
 
       try {
-        // Fetch the video details for all songs in the queue asynchronously
-        const infoPromises = queueList.map((song) => ytdl.getBasicInfo(song));
-        const infoList = await Promise.all(infoPromises);
-
-        // Format the list with index and title
-        const formattedList = infoList.map((info, index) => {
-          let title = info.videoDetails.title;
-          if (index === 0) {
-            title = `(Now playing) ${title}`;
-          }
-          return `${index}. ${title}`;
-        });
+        // Fetch the details for all audio in the queue asynchronously
+        const formattedList = await getQueueMap(queueList);
 
         // Update the initial reply with the formatted list
         initialReply.edit({ content: `Current queue:\n${formattedList.join('\n')}` });
       } catch (error) {
-        console.error('Error fetching video details:', (error as Error).message);
+        console.error('Error fetching queue details:', (error as Error).message);
         // Update the initial reply with an error message
-        initialReply.edit({ content: 'Error fetching video details.' });
+        initialReply.edit({ content: 'Error fetching queue details.' });
       }
+    }
+
+    async function getQueueMap(queueList: string[]) {
+      const infoPromises = queueList.map((song) => ytdl.getBasicInfo(song));
+      const infoList = await Promise.all(infoPromises);
+
+      // Format the list with index and title
+      const formattedList = infoList.map((info, index) => {
+        let title = info.videoDetails.title;
+        if (index === 0) {
+          title = `(Now playing) ${title}`;
+        }
+        return `${index}. ${title}`;
+      });
+      return formattedList;
     }
 
     async function handleRemoveCommand(interaction: ChatInputCommandInteraction<CacheType>) {
       const indexToRemove = interaction.options.getInteger('index');
       if (indexToRemove) {
-        MusicQueue.getInstance().removeSong(indexToRemove);
+        MusicQueue.getInstance().removeSong(indexToRemove - 1);
       } else {
         interaction.reply({ content: 'Please input an index.', ephemeral: true });
         return;
       }
       MusicQueue.getInstance().removeSong(indexToRemove);
-      interaction.reply({ content: `Removed from queue.`, ephemeral: true });
+      interaction.reply({
+        content: `'Option ${indexToRemove} removed from queue.`,
+        ephemeral: true,
+      });
+      const formattedList = await getQueueMap(MusicQueue.getInstance().getQueue());
+      interaction.followUp({
+        content: `Updated queue:\n${formattedList.join('\n')}`,
+        ephemeral: true,
+      });
     }
   },
 };
