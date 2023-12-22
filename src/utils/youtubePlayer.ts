@@ -22,15 +22,57 @@ export async function playFromYoutubeURL(
   const connection: VoiceConnection = joinUsersChannel(interaction)!;
   const title = (await ytdl.getBasicInfo(inputURL)).videoDetails.title;
 
-  // Add the song to the queue
-  queue.enqueue(inputURL);
+  const subcommand = interaction.options.getSubcommand();
 
-  // If the player is not currently playing, start playing the song
-  if (queue.isEmpty() || queue.getQueue().length === 1) {
-    console.log(`'${title}' will be played immediately. Queue length: ${queue.getQueue().length}`);
-    playNextSong(interaction, connection, queue);
-  } else {
-    console.log(`'${title}' added to the queue. Queue length: ${queue.getQueue().length}`);
+  switch (subcommand) {
+    case 'add':
+      // Add the song to the queue
+      queue.enqueue(inputURL);
+
+      // If the player is not currently playing, start playing the song
+      if (queue.isEmpty() || queue.getQueue().length === 1) {
+        playNextSong(interaction, connection, queue);
+        interaction.reply({
+          content: `Now playing: '${title} as requested by ${interaction.user.username}'`,
+          ephemeral: true,
+        });
+      } else {
+        interaction.reply(
+          `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`
+        );
+      }
+      break;
+
+    case 'list':
+      // List the songs in the queue
+      const queueList = queue.getQueue();
+      if (queueList.length === 0) {
+        interaction.reply({ content: 'The queue is empty.', ephemeral: true });
+      } else {
+        interaction.reply({
+          content: `Current queue:\n${queueList.map((song, i) => `${i + 1}. ${song}`).join('\n')}`,
+          ephemeral: true,
+        });
+      }
+      break;
+
+    case 'remove':
+      // Remove a song from the queue based on the user's selection
+      const indexToRemove = interaction.options.getInteger('index');
+      if (!indexToRemove) {
+        interaction.reply({ content: 'Please provide a valid index.', ephemeral: true });
+        return;
+      }
+      const removedSong = queue.removeSong(indexToRemove - 1);
+      if (removedSong) {
+        interaction.reply({ content: `Removed song: ${removedSong}`, ephemeral: true });
+      } else {
+        interaction.reply({ content: 'Invalid index or the queue is empty.', ephemeral: true });
+      }
+      break;
+
+    default:
+      interaction.reply({ content: 'Invalid subcommand.', ephemeral: true });
   }
 }
 
@@ -69,10 +111,8 @@ async function playNextSong(
     console.error('Error waiting for player to enter Idle state:', (error as Error).message);
   }
 
-  // Remove the finished song from the queue
   queue.dequeue();
 
-  // If there are more songs in the queue, play the next one
   if (!queue.isEmpty()) {
     console.log(`Playing next song in queue. Queue length: ${queue.getQueue().length}`);
     playNextSong(interaction, connection, queue);
