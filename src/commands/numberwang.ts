@@ -1,16 +1,5 @@
-import {
-  CacheType,
-  ChatInputCommandInteraction,
-  Client,
-  GuildMember,
-  SlashCommandBuilder,
-  User,
-} from 'discord.js';
+import { SlashCommandBuilder, User } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
-import ytdl, { validateURL } from 'ytdl-core';
-import fs, { createReadStream } from 'fs';
-import { createAudioPlayer, createAudioResource, joinVoiceChannel } from '@discordjs/voice';
-import { VoiceConnection } from '@discordjs/voice';
 import numberwangModel, { INumberwang, Numberwang } from '../database/models/numberwangModel';
 import { Types } from 'mongoose';
 import { getRandomInt } from '../utils/randomNumber';

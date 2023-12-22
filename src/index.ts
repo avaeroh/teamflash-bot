@@ -15,7 +15,7 @@ import { getRandomInt } from './utils/randomNumber';
   const BOT = new Client({
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
   });
-  await connectDatabase();
+  connectDatabase();
   await BOT.login(process.env.BOT_TOKEN);
 
   // The .on() syntax is used when we want the bot to listen to a certain event.
