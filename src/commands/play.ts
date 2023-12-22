@@ -1,11 +1,9 @@
 import { CacheType, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
-import ytdl, { validateURL } from 'ytdl-core';
-import { createAudioPlayer, createAudioResource } from '@discordjs/voice';
-import { VoiceConnection } from '@discordjs/voice';
-import { url } from 'inspector';
+import { validateURL } from 'ytdl-core';
+
 import { UserId } from '../utils/userIdEnums';
-import { joinUsersChannel } from '../utils/voiceChannelHelper';
+
 import { playFromYoutubeURL } from '../utils/youtubePlayer';
 
 const playCommand: ICommand = {
