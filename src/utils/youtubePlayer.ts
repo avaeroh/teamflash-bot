@@ -64,6 +64,10 @@ export async function playFromYoutubeURL(
         return;
       }
       const removedSong = queue.removeSong(indexToRemove - 1);
+      if (indexToRemove === 1) {
+        playNextSong(interaction, connection, queue);
+      }
+
       if (removedSong) {
         interaction.reply({ content: `Removed song: ${removedSong}`, ephemeral: true });
       } else {
