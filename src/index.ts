@@ -37,8 +37,7 @@ import { getRandomInt } from './utils/randomNumber';
 
   //Some memes for when people join voice channels
   BOT.on('voiceStateUpdate', async (oldState, newState) => {
-    const VIBE_CHANNEL_ID = '806490600957935676';
-    const ANNOUNCEMENTS_CHANNEL_ID = '806490722793422869';
+    const ANNOUNCEMENTS_CHANNEL_ID = '807540821997649941';
     // if there is no newState channel, the user has just left a channel
     const USER_LEFT = !newState.channel;
     // if there is no oldState channel, the user has just joined a channel
@@ -52,9 +51,11 @@ import { getRandomInt } from './utils/randomNumber';
 
     if (
       // if a user has just joined or switched to a voice channel
-      (USER_JOINED || USER_SWITCHED) &&
-      // and the new voice channel is the same as the support channel
-      newState.channel.id === VIBE_CHANNEL_ID
+      USER_JOINED
+      // ||
+      // USER_SWITCHED
+      // // and the new voice channel is the same as the support channel
+      // newState.channel.id === VIBE_CHANNEL_ID
     ) {
       try {
         let channel = <TextChannel>await BOT.channels.fetch(ANNOUNCEMENTS_CHANNEL_ID);

@@ -28,7 +28,7 @@ export async function informSam(channel: TextChannel, newState: VoiceState) {
     wahey = `👀🍆🥵`;
   }
   channel!.send(
-    `Hey @${newState.member!.displayName}! Just to keep you in the loop...\n${
+    `Hey @${newState.member!}! Just to keep you in the loop...\n${
       updates.title
     } is currently ranked '${updates.rank_month_model}' on PornHub for this month, from '${
       updates.rank_last_month_model
