@@ -28,6 +28,7 @@ services:
       - db
 
   teamflash-bot:
+    container_name: teamflash-bot
     build:
       context: .
       dockerfile: ${ARMDockerfile:-Dockerfile}
