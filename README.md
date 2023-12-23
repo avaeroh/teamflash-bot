@@ -69,3 +69,4 @@ This [article from the discord.js Guide](https://discordjs.guide/slash-commands/
 - A great [tutorial by Naomi Carrigan](https://www.freecodecamp.org/news/build-a-100-days-of-code-discord-bot-with-typescript-mongodb-and-discord-js-13/) which helped me write this guide.
 - The absolutely amazing [discord.js Guide](https://discordjs.guide/).
 - [discord.js Official Documentation](https://discord.js.org/#/docs/discord.js/main/general/welcome)
+
