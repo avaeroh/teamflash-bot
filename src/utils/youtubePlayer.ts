@@ -37,9 +37,10 @@ export async function playFromYoutubeURL(
           ephemeral: true,
         });
       } else {
-        interaction.reply(
-          `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`
-        );
+        interaction.reply({
+          content: `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`,
+          ephemeral: true,
+        });
       }
       break;
 
