@@ -33,6 +33,11 @@ export class MusicQueue {
     return [...this.queue];
   }
 
+  public clearQueue(): void {
+    this.queue = [];
+    console.log('Cleared queue.');
+  }
+
   public removeSong(index: number): string | undefined {
     if (index < 0 || index >= this.queue.length) {
       console.log(
