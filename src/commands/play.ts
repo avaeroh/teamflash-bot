@@ -3,11 +3,11 @@ import { ICommand } from '../interfaces/ICommand';
 
 import { UserId } from '../utils/userIdEnums';
 
-import { MusicQueue } from '../utils/musicQueue';
+import { MusicQueue } from '../utils/audio/musicQueue';
 import ytdl, { validateURL } from 'ytdl-core';
-import { playNextSong } from '../utils/youtubePlayer';
+import { playNextSong } from '../utils/audio/youtubePlayer';
 import { VoiceConnection } from '@discordjs/voice';
-import { joinUsersChannel } from '../utils/voiceChannelHelper';
+import { joinUsersChannel } from '../utils/audio/voiceChannelHelper';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()

@@ -1,12 +1,7 @@
-import {
-  createAudioPlayer,
-  VoiceConnection,
-  createAudioResource,
-  AudioPlayerStatus,
-} from '@discordjs/voice';
+import { VoiceConnection, createAudioResource, AudioPlayerStatus } from '@discordjs/voice';
 import { ChatInputCommandInteraction, CacheType } from 'discord.js';
 import ytdl from 'ytdl-core';
-import { joinUsersChannel } from './voiceChannelHelper';
+import { AudioManager } from './audioManager';
 import { MusicQueue } from './musicQueue';
 
 export async function playNextSong(
@@ -14,10 +9,8 @@ export async function playNextSong(
   connection: VoiceConnection,
   queue: MusicQueue
 ) {
-  const player = createAudioPlayer();
-  player.on('error', (error) => {
-    console.error('Error:', error.message, 'with track');
-  });
+  const audioManager = AudioManager.getInstance();
+  const player = audioManager.getPlayer();
 
   const inputURL = queue.getQueue()[0]; // Peek at the front of the queue without dequeueing
   if (!inputURL) {
