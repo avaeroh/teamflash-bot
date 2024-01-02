@@ -5,7 +5,9 @@ import { UserId } from '../utils/userIdEnums';
 
 import { MusicQueue } from '../utils/musicQueue';
 import ytdl, { validateURL } from 'ytdl-core';
-import { playFromYoutubeURL } from '../utils/youtubePlayer';
+import { playNextSong } from '../utils/youtubePlayer';
+import { VoiceConnection } from '@discordjs/voice';
+import { joinUsersChannel } from '../utils/voiceChannelHelper';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()
@@ -73,7 +75,24 @@ const playCommand: ICommand = {
       if (inputURL) {
         const validUrl = validateURL(inputURL);
         if (validUrl) {
-          await playFromYoutubeURL(interaction, inputURL);
+          const connection: VoiceConnection = joinUsersChannel(interaction)!;
+          const title = (await ytdl.getBasicInfo(inputURL)).videoDetails.title;
+          const queue = MusicQueue.getInstance();
+          MusicQueue.getInstance().enqueue(inputURL);
+
+          // If the player is not currently playing, start playing the song
+          if (queue.isEmpty() || queue.getQueue().length === 1) {
+            playNextSong(interaction, connection, queue);
+            interaction.reply({
+              content: `Now playing: '${title}' as requested by ${interaction.user.username}`,
+              ephemeral: true,
+            });
+          } else {
+            interaction.reply({
+              content: `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`,
+              ephemeral: true,
+            });
+          }
         } else {
           interaction.reply({ content: 'Please input a valid URL.', ephemeral: true });
         }
