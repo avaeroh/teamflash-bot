@@ -36,13 +36,12 @@ export async function playNextSong(interaction: ChatInputCommandInteraction<Cach
   try {
     await new Promise<void>((resolve, reject) => {
       player.on(AudioPlayerStatus.Idle, () => resolve());
+      player.on(AudioPlayerStatus.Idle, () => queue.dequeue());
       player.on('error', (error) => reject(error));
     });
   } catch (error) {
     console.error('Error waiting for player to enter Idle state:', (error as Error).message);
   }
-
-  // queue.dequeue();
 
   if (!queue.isEmpty()) {
     console.log(`Playing next song in queue. Queue length: ${queue.getQueue().length}`);
