@@ -3,11 +3,12 @@ import { ICommand } from '../interfaces/ICommand';
 
 import { UserId } from '../utils/userIdEnums';
 
-import { MusicQueue } from '../utils/audio/musicQueue';
+import { MusicQueue } from '../utils/audio/audioQueueManager';
 import ytdl, { validateURL } from 'ytdl-core';
 import { playNextSong } from '../utils/audio/youtubePlayer';
-import { VoiceConnection } from '@discordjs/voice';
-import { joinUsersChannel } from '../utils/audio/voiceChannelHelper';
+import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
+import { AudioManager } from '../utils/audio/audioManager';
+import { PlayerSubscription } from '@discordjs/voice';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()
@@ -72,17 +73,17 @@ const playCommand: ICommand = {
 
     async function handleAddCommand(interaction: ChatInputCommandInteraction<CacheType>) {
       const inputURL = interaction.options.getString('input');
+      const queue = MusicQueue.getInstance();
       if (inputURL) {
         const validUrl = validateURL(inputURL);
         if (validUrl) {
-          const connection: VoiceConnection = joinUsersChannel(interaction)!;
           const title = (await ytdl.getBasicInfo(inputURL)).videoDetails.title;
-          const queue = MusicQueue.getInstance();
-          MusicQueue.getInstance().enqueue(inputURL);
+
+          queue.enqueue(inputURL);
 
           // If the player is not currently playing, start playing the song
-          if (queue.isEmpty() || queue.getQueue().length === 1) {
-            playNextSong(interaction, connection, queue);
+          if (queue.getQueue().length === 1) {
+            playNextSong(interaction);
             interaction.reply({
               content: `Now playing: '${title}' as requested by ${interaction.user.username}`,
               ephemeral: true,
@@ -142,22 +143,36 @@ const playCommand: ICommand = {
 
     async function handleRemoveCommand(interaction: ChatInputCommandInteraction<CacheType>) {
       const indexToRemove = interaction.options.getInteger('index');
+      const musicQueue = MusicQueue.getInstance();
+      const voiceConnectionManager = ConnectionManager.getInstance();
+      const player = AudioManager.getInstance().getPlayer();
       if (indexToRemove) {
-        MusicQueue.getInstance().removeSong(indexToRemove - 1);
+        //users will use 1-indexing, but the queue is 0-indexed
+        musicQueue.removeSong(indexToRemove - 1);
+        if (indexToRemove === 1) {
+          // If removing the first item and it is currently playing, stop playback
+          player.stop();
+          playNextSong(interaction);
+        }
+        if (musicQueue.isEmpty()) {
+          interaction.reply({ content: 'The queue is empty, disconnecting.', ephemeral: true });
+          player.stop();
+          voiceConnectionManager.getConnection()?.destroy();
+          return;
+        }
+        interaction.reply({
+          content: `'Option ${indexToRemove} removed from queue.`,
+          ephemeral: true,
+        });
+        const formattedList = await getQueueMap(musicQueue.getQueue());
+        interaction.followUp({
+          content: `Updated queue:\n${formattedList.join('\n')}`,
+          ephemeral: true,
+        });
       } else {
         interaction.reply({ content: 'Please input an index.', ephemeral: true });
         return;
       }
-      MusicQueue.getInstance().removeSong(indexToRemove);
-      interaction.reply({
-        content: `'Option ${indexToRemove} removed from queue.`,
-        ephemeral: true,
-      });
-      const formattedList = await getQueueMap(MusicQueue.getInstance().getQueue());
-      interaction.followUp({
-        content: `Updated queue:\n${formattedList.join('\n')}`,
-        ephemeral: true,
-      });
     }
   },
 };

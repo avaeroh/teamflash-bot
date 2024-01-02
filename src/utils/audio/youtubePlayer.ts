@@ -2,15 +2,20 @@ import { VoiceConnection, createAudioResource, AudioPlayerStatus } from '@discor
 import { ChatInputCommandInteraction, CacheType } from 'discord.js';
 import ytdl from 'ytdl-core';
 import { AudioManager } from './audioManager';
-import { MusicQueue } from './musicQueue';
+import { MusicQueue } from './audioQueueManager';
+import { ConnectionManager, joinUsersChannel } from './voiceConnectionManager';
 
-export async function playNextSong(
-  interaction: ChatInputCommandInteraction<CacheType>,
-  connection: VoiceConnection,
-  queue: MusicQueue
-) {
+export async function playNextSong(interaction: ChatInputCommandInteraction<CacheType>) {
+  const queue = MusicQueue.getInstance();
   const audioManager = AudioManager.getInstance();
   const player = audioManager.getPlayer();
+
+  const connectionManager = ConnectionManager.getInstance();
+  let connection = connectionManager.getConnection();
+
+  if (!connection) {
+    connection = joinUsersChannel(interaction)!;
+  }
 
   const inputURL = queue.getQueue()[0]; // Peek at the front of the queue without dequeueing
   if (!inputURL) {
@@ -37,11 +42,11 @@ export async function playNextSong(
     console.error('Error waiting for player to enter Idle state:', (error as Error).message);
   }
 
-  queue.dequeue();
+  // queue.dequeue();
 
   if (!queue.isEmpty()) {
     console.log(`Playing next song in queue. Queue length: ${queue.getQueue().length}`);
-    playNextSong(interaction, connection, queue);
+    playNextSong(interaction);
   } else {
     console.log('Queue is empty.');
   }
