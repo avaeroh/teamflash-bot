@@ -1,13 +1,13 @@
 import { VoiceConnection, createAudioResource, AudioPlayerStatus } from '@discordjs/voice';
 import { ChatInputCommandInteraction, CacheType } from 'discord.js';
 import ytdl from 'ytdl-core';
-import { AudioManager } from './audioManager';
-import { MusicQueue } from './audioQueueManager';
+import { AudioPlayerManager } from './audioPlayerManager';
+import { AudioQueueManager } from './audioQueueManager';
 import { ConnectionManager, joinUsersChannel } from './voiceConnectionManager';
 
 export async function playNextSong(interaction: ChatInputCommandInteraction<CacheType>) {
-  const queue = MusicQueue.getInstance();
-  const audioManager = AudioManager.getInstance();
+  const queue = AudioQueueManager.getInstance();
+  const audioManager = AudioPlayerManager.getInstance();
   const player = audioManager.getPlayer();
 
   const connectionManager = ConnectionManager.getInstance();

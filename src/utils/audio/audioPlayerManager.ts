@@ -1,7 +1,7 @@
 import { AudioPlayer, createAudioPlayer } from '@discordjs/voice';
 
-export class AudioManager {
-  private static instance: AudioManager | null = null;
+export class AudioPlayerManager {
+  private static instance: AudioPlayerManager | null = null;
   private player: AudioPlayer;
 
   private constructor() {
@@ -11,11 +11,11 @@ export class AudioManager {
     });
   }
 
-  public static getInstance(): AudioManager {
-    if (!AudioManager.instance) {
-      AudioManager.instance = new AudioManager();
+  public static getInstance(): AudioPlayerManager {
+    if (!AudioPlayerManager.instance) {
+      AudioPlayerManager.instance = new AudioPlayerManager();
     }
-    return AudioManager.instance;
+    return AudioPlayerManager.instance;
   }
 
   public getPlayer(): AudioPlayer {

@@ -1,17 +1,17 @@
 import { VoiceConnection, joinVoiceChannel } from '@discordjs/voice';
 import { ChatInputCommandInteraction, CacheType, GuildMember } from 'discord.js';
 
-class ConnectionManager {
-  private static instance: ConnectionManager | undefined;
+class VoiceConnectionManager {
+  private static instance: VoiceConnectionManager | undefined;
   private connection: VoiceConnection | undefined;
 
   private constructor() {}
 
-  public static getInstance(): ConnectionManager {
-    if (!ConnectionManager.instance) {
-      ConnectionManager.instance = new ConnectionManager();
+  public static getInstance(): VoiceConnectionManager {
+    if (!VoiceConnectionManager.instance) {
+      VoiceConnectionManager.instance = new VoiceConnectionManager();
     }
-    return ConnectionManager.instance;
+    return VoiceConnectionManager.instance;
   }
 
   public setConnection(connection: VoiceConnection): void {
@@ -42,4 +42,4 @@ export function joinUsersChannel(interaction: ChatInputCommandInteraction<CacheT
   }
 }
 
-export { ConnectionManager };
+export { VoiceConnectionManager as ConnectionManager };

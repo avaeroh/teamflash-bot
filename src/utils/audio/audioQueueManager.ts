@@ -1,14 +1,14 @@
-export class MusicQueue {
-  private static instance: MusicQueue;
+export class AudioQueueManager {
+  private static instance: AudioQueueManager;
   private queue: string[] = [];
 
   private constructor() {}
 
-  public static getInstance(): MusicQueue {
-    if (!MusicQueue.instance) {
-      MusicQueue.instance = new MusicQueue();
+  public static getInstance(): AudioQueueManager {
+    if (!AudioQueueManager.instance) {
+      AudioQueueManager.instance = new AudioQueueManager();
     }
-    return MusicQueue.instance;
+    return AudioQueueManager.instance;
   }
 
   public enqueue(song: string): void {

@@ -3,11 +3,11 @@ import { ICommand } from '../interfaces/ICommand';
 
 import { UserId } from '../utils/userIdEnums';
 
-import { MusicQueue } from '../utils/audio/audioQueueManager';
+import { AudioQueueManager } from '../utils/audio/audioQueueManager';
 import ytdl, { validateURL } from 'ytdl-core';
 import { playNextSong } from '../utils/audio/youtubePlayer';
 import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
-import { AudioManager } from '../utils/audio/audioManager';
+import { AudioPlayerManager } from '../utils/audio/audioPlayerManager';
 import { PlayerSubscription } from '@discordjs/voice';
 
 const playCommand: ICommand = {
@@ -73,7 +73,7 @@ const playCommand: ICommand = {
 
     async function handleAddCommand(interaction: ChatInputCommandInteraction<CacheType>) {
       const inputURL = interaction.options.getString('input');
-      const queue = MusicQueue.getInstance();
+      const queue = AudioQueueManager.getInstance();
       if (inputURL) {
         const validUrl = validateURL(inputURL);
         if (validUrl) {
@@ -103,7 +103,7 @@ const playCommand: ICommand = {
     }
 
     async function handleListCommand(interaction: ChatInputCommandInteraction<CacheType>) {
-      const queueList = MusicQueue.getInstance().getQueue();
+      const queueList = AudioQueueManager.getInstance().getQueue();
 
       if (queueList.length === 0) {
         interaction.reply({ content: 'The queue is empty.', ephemeral: true });
@@ -143,9 +143,9 @@ const playCommand: ICommand = {
 
     async function handleRemoveCommand(interaction: ChatInputCommandInteraction<CacheType>) {
       const indexToRemove = interaction.options.getInteger('index');
-      const musicQueue = MusicQueue.getInstance();
+      const musicQueue = AudioQueueManager.getInstance();
       const voiceConnectionManager = ConnectionManager.getInstance();
-      const player = AudioManager.getInstance().getPlayer();
+      const player = AudioPlayerManager.getInstance().getPlayer();
       if (indexToRemove) {
         //users will use 1-indexing, but the queue is 0-indexed
         musicQueue.removeSong(indexToRemove - 1);
