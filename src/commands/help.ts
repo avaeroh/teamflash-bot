@@ -11,8 +11,8 @@ const help: ICommand = {
     \n/play add <Youtube URL> | To play/add YouTube audio to the queue.
     \n/play list | To list the songs currently in the queue.
     \n/play remove <Queue number> | To remove an item from the queue. Note: Removing the current playing song will not yet immediately terminate its play.
-    \n/help | Literally this thing you're reading now. 
-    `,
+    \n/google | Return the top 10 Google searches.
+    \n/help | Literally this thing you're reading now.`,
       ephemeral: true,
     });
   },
