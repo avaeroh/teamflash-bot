@@ -1,7 +1,4 @@
-FROM node:18-alpine
-ENV NODE_ENV=production
-
-# syntax=docker/dockerfile:1
+FROM node:21
 
 ENV NODE_ENV=production
 
@@ -15,7 +12,17 @@ USER node
 
 COPY ["package.json", "package-lock.json*", "./"]
 
-
 RUN npm run build &&\
     npm run deploy
+
+# Playwright Installation #
+RUN npx playwright install
+
+## Temporarily switch to root for installing dependencies
+USER root
+RUN npx playwright install-deps
+
+## Switch back to a non-root user for running the application
+USER node
+
 CMD ["npm", "start"]
