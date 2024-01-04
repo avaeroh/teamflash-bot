@@ -8,7 +8,8 @@ import ytdl, { validateURL } from 'ytdl-core';
 import { playNextSong } from '../utils/audio/youtubePlayer';
 import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
 import { AudioPlayerManager } from '../utils/audio/audioPlayerManager';
-import { PlayerSubscription } from '@discordjs/voice';
+import { findYoutubeAudioByText } from '../utils/browserUi';
+import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()
@@ -72,30 +73,31 @@ const playCommand: ICommand = {
     }
 
     async function handleAddCommand(interaction: ChatInputCommandInteraction<CacheType>) {
-      const inputURL = interaction.options.getString('input');
-      const queue = AudioQueueManager.getInstance();
-      if (inputURL) {
-        const validUrl = validateURL(inputURL);
-        if (validUrl) {
-          const title = (await ytdl.getBasicInfo(inputURL)).videoDetails.title;
-
-          queue.enqueue(inputURL);
-
-          // If the player is not currently playing, start playing the song
-          if (queue.getQueue().length === 1) {
-            playNextSong(interaction);
-            interaction.reply({
-              content: `Now playing: '${title}' as requested by ${interaction.user.username}`,
-              ephemeral: true,
-            });
-          } else {
-            interaction.reply({
-              content: `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`,
-              ephemeral: true,
-            });
-          }
+      const inputText = interaction.options.getString('input');
+      if (inputText) {
+        const validYoutubeUrl = validateURL(inputText);
+        interaction.deferReply();
+        if (validYoutubeUrl) {
+          await handleAddToSongQueue(inputText, interaction);
+          //If there's no YouTube URL, the user is searching for a song
         } else {
-          interaction.reply({ content: 'Please input a valid URL.', ephemeral: true });
+          if (containsNaughtyWords(inputText)) {
+            return rejectInteraction(
+              interaction,
+              inputText,
+              `I'm not going to search for that on YouTube, ${interaction.member!.user}`
+            );
+          } else {
+            let songUrl = await findYoutubeAudioByText(inputText);
+            if (songUrl) {
+              await handleAddToSongQueue(songUrl, interaction);
+            } else {
+              interaction.followUp({
+                content: `There was an error adding the song to the music queue.`,
+                ephemeral: true,
+              });
+            }
+          }
         }
       } else {
         interaction.reply({ content: 'Please input a URL.', ephemeral: true });
@@ -176,5 +178,29 @@ const playCommand: ICommand = {
     }
   },
 };
+
+async function handleAddToSongQueue(
+  inputText: string,
+  interaction: ChatInputCommandInteraction<CacheType>
+) {
+  const title = (await ytdl.getBasicInfo(inputText)).videoDetails.title;
+
+  const queue = AudioQueueManager.getInstance();
+  queue.enqueue(inputText);
+
+  // If the player is not currently playing, start playing the song
+  if (queue.getQueue().length === 1) {
+    playNextSong(interaction);
+    interaction.followUp({
+      content: `Now playing: '${title}' as requested by ${interaction.user.username}`,
+      ephemeral: true,
+    });
+  } else {
+    interaction.followUp({
+      content: `'${title}' added to the queue. Queue length: ${queue.getQueue().length}`,
+      ephemeral: true,
+    });
+  }
+}
 
 module.exports = playCommand;

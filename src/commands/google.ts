@@ -1,6 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
 import { googleQuery } from '../utils/browserUi';
+import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 
 const badWordsListRegex = require('badwords-list').regex;
 
@@ -24,17 +25,19 @@ const google: ICommand = {
       );
 
       if (question) {
-        if (badWordsListRegex.test(question!)) {
-          await interaction.reply({
-            content: `I don't think I want to Search for that, ${interaction.member!.user}.`,
-            ephemeral: true,
-          });
+        await interaction.deferReply({ ephemeral: true });
+        if (containsNaughtyWords(question!)) {
+          rejectInteraction(
+            interaction,
+            question,
+            `I don't think I want to search for that, ${interaction.member!.user}.`
+          );
           console.warn(
             `REJECETED: '${interaction.member?.user.username}' searching for '${question}'`
           );
           return;
         }
-        await interaction.deferReply({ ephemeral: true });
+
         let response;
         try {
           response = await googleQuery(question);
