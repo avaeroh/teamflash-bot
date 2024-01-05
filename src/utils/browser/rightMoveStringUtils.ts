@@ -1,7 +1,7 @@
-import { PropertyInfo } from './rightmove';
+import { PropertyInfo } from './rightmoveScraper';
 
 export async function getFormattedRightMoveInfo(propertyInfo: PropertyInfo) {
-  let formattedInfo = `**${propertyInfo.title}**
+  let formattedInfo = `**[${propertyInfo.title}](<${propertyInfo.url}>)**
 
 **Description:**
 Price: ${propertyInfo.price || 'Not specified'}
@@ -10,12 +10,10 @@ Bedrooms: ${propertyInfo.description.bedrooms || 'Not specified'}
 Bathrooms: ${propertyInfo.description.bathrooms || 'Not specified'}
 Size: ${propertyInfo.description.size || 'Not specified'}
 Internet: ${propertyInfo.internet || 'Not specified'}
-\n
-`;
-
+\n`;
   if (propertyInfo.commute && propertyInfo.commute.length > 0) {
     for (const commute of propertyInfo.commute) {
-      formattedInfo += `**Commute From '${commute.location}'**
+      formattedInfo += `**Commute To '${commute.location}'**
 Driving Duration: ${commute.drivingDuration || 'Not specified'}
 Public Transport Duration: ${commute.publicTransportDuration || 'Not specified'}
 Walking Duration: ${commute.walkingDuration || 'Not specified'}

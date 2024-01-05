@@ -1,9 +1,11 @@
 import playwright from 'playwright';
 import { getPageAndBrowser } from './browserUtils';
+import { sleep } from '../debugHelper';
 
 export type PropertyInfo = {
-  title?: string | undefined;
-  price?: string | undefined;
+  url?: string;
+  title?: string | undefined | null;
+  price?: string | undefined | null;
   internet?: string | undefined | null;
   description: Description;
   commute?: Commute[];
@@ -50,10 +52,10 @@ export async function getRightMovePropertyInfo(url: string, optionalLocations: (
   }
 
   //get basic info
-  propertyInfo.title = await rightMovePage.locator('h1').innerText();
+  propertyInfo.title = await rightMovePage.locator('h1').textContent();
   propertyInfo.price = await rightMovePage
     .locator("//article //span[text()[contains(.,'£')]]")
-    .innerText();
+    .textContent();
 
   //get internet info
   await rightMovePage.locator("//div[@data-gtm-name='broadband-checker']").click();
@@ -161,11 +163,14 @@ async function getCommuteInfo(
   const location = (await toDestionationLocator.getAttribute('aria-label'))?.split(
     'Destination '
   )[1];
+  //no other easy way to wait for URL to update
+  await sleep(1);
+  const mapUrl = mapsPage.url();
   await fromDestinationLocator.clear();
   await toDestionationLocator.clear();
 
   return {
-    location: location ?? areaOfInterest,
+    location: `[${location}](<${mapUrl}>)` ?? areaOfInterest,
     drivingDuration: await drivingDurationLocator.textContent(),
     publicTransportDuration: await publicTransportDuration.textContent(),
     walkingDuration: await walkingDuration.textContent(),

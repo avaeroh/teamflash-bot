@@ -2,7 +2,7 @@ import { SlashCommandBuilder } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
 import { googleQuery } from '../utils/browser/browserUtils';
 import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
-import { getRightMovePropertyInfo } from '../utils/browser/rightmove';
+import { getRightMovePropertyInfo } from '../utils/browser/rightmoveScraper';
 import { getFormattedRightMoveInfo } from '../utils/browser/rightMoveStringUtils';
 
 const optionalLocationDescription =
@@ -58,13 +58,22 @@ const rightmove: ICommand = {
 
       if (rightMoveUrl) {
         await interaction.deferReply({ ephemeral: true });
-        const rightMoveRegex = new RegExp('.*www.rightmove.co.uk/properties/[0-9].*#/.*/');
 
+        //reject invalid URLs
+        const rightMoveRegex = new RegExp('.*www.rightmove.co.uk/properties/[0-9].*#/.*/');
         if (rightMoveRegex.test(rightMoveUrl)) {
           rejectInteraction(interaction, rightMoveUrl, `That is an invalid Rightmove URL.`);
-          console.warn(
-            `REJECETED: '${interaction.member?.user.username}' sending rightmove URL as '${rightMoveUrl}'`
+          return;
+        }
+
+        //reject image links
+        if (rightMoveUrl.includes('id=media')) {
+          rejectInteraction(
+            interaction,
+            rightMoveUrl,
+            `Cannot process ${rightMoveUrl}, please only share the base property URL, rather than images of the property.`
           );
+
           return;
         }
 
@@ -83,6 +92,7 @@ const rightmove: ICommand = {
 
         try {
           propertyInfo = await getRightMovePropertyInfo(rightMoveUrl, optionalLocations);
+          propertyInfo.url = rightMoveUrl;
 
           await interaction.followUp({
             content: `${await getFormattedRightMoveInfo(propertyInfo)}`,
