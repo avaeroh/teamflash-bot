@@ -23,7 +23,7 @@ type Description = {
   size: string | undefined | null;
 };
 
-export async function getRightMovePropertyInfo(url: string) {
+export async function getRightMovePropertyInfo(url: string, optionalLocations: (string | null)[]) {
   const { page: rightMovePage, browser } = await getPageAndBrowser();
   await rightMovePage.goto(url);
 
@@ -34,8 +34,13 @@ export async function getRightMovePropertyInfo(url: string) {
       bathrooms: undefined,
       size: undefined,
     },
-    commute: [{ location: 'London Bridge' }, { location: 'Victoria' }],
+    commute: [],
   };
+
+  //handle optional locations
+  optionalLocations?.forEach((optionalLocation) => {
+    optionalLocation ? propertyInfo.commute?.push({ location: optionalLocation }) : null;
+  });
 
   const rightMoveCookieModal = rightMovePage.locator('[id="onetrust-reject-all-handler"]');
   try {
@@ -45,13 +50,13 @@ export async function getRightMovePropertyInfo(url: string) {
     console.log('No cookies to reject');
   }
 
-  //basics
+  //get basic info
   propertyInfo.title = await rightMovePage.locator('h1').innerText();
   propertyInfo.price = await rightMovePage
     .locator("//article //span[text()[contains(.,'£')]]")
     .innerText();
 
-  //internet
+  //get internet info
   await rightMovePage.locator("//div[@data-gtm-name='broadband-checker']").click();
   const internetLocator = rightMovePage.locator(
     "//div[@data-testid='DTbroadband-widget'] //div[@class] //div"
@@ -63,7 +68,7 @@ export async function getRightMovePropertyInfo(url: string) {
     .join(' - ')
     .trim();
 
-  //propety description
+  //get propety description info
   propertyInfo.description.propertyType = await getPropertyDescription(
     rightMovePage,
     '[data-testid="svg-house"]'
@@ -82,40 +87,43 @@ export async function getRightMovePropertyInfo(url: string) {
     '[data-testid="svg-floorplan"]'
   );
 
-  //enhancement info
-  await rightMovePage.locator("//a[contains(@href, '#/streetView')]").click();
-  const addressLocator = rightMovePage.locator(
-    "//div[contains(@class, 'gm-iv-address-description')]"
-  );
-  await addressLocator.waitFor();
-  const propertyAddress = (await addressLocator.textContent())?.trim();
-  //get commute info if address is available
-  if (propertyAddress) {
-    try {
-      const mapsPage = await browser.newPage();
-      const rejectCookiesButton = mapsPage
-        .locator("//span[text()[contains(.,'Reject all')]]")
-        .first();
-      await mapsPage.goto('https://www.google.co.uk/maps/');
-      await mapsPage.waitForLoadState();
-      if (await rejectCookiesButton.isVisible()) {
-        await rejectCookiesButton.click();
-      }
-      await mapsPage.locator("//button[contains(@aria-label, 'Directions')]").click();
-      if (propertyInfo.commute) {
-        let commuteInfo: Commute[] = [];
-
-        for (const commute of propertyInfo.commute) {
-          commuteInfo.push(await getCommuteInfo(mapsPage, propertyAddress, commute.location));
+  //get commute times
+  if (propertyInfo.commute) {
+    await rightMovePage.locator("//a[contains(@href, '#/streetView')]").click();
+    const addressLocator = rightMovePage.locator(
+      "//div[contains(@class, 'gm-iv-address-description')]"
+    );
+    await addressLocator.waitFor();
+    const propertyAddress = (await addressLocator.textContent())?.trim();
+    //get commute info if address is available
+    if (propertyAddress) {
+      try {
+        const mapsPage = await browser.newPage();
+        const rejectCookiesButton = mapsPage
+          .locator("//span[text()[contains(.,'Reject all')]]")
+          .first();
+        await mapsPage.goto('https://www.google.co.uk/maps/');
+        await mapsPage.waitForLoadState();
+        if (await rejectCookiesButton.isVisible()) {
+          await rejectCookiesButton.click();
         }
-        propertyInfo.commute = commuteInfo;
+        await mapsPage.locator("//button[contains(@aria-label, 'Directions')]").click();
+        if (propertyInfo.commute) {
+          let commuteInfo: Commute[] = [];
+
+          for (const commute of propertyInfo.commute) {
+            commuteInfo.push(await getCommuteInfo(mapsPage, propertyAddress, commute.location));
+          }
+          propertyInfo.commute = commuteInfo;
+        }
+        mapsPage.close();
+      } catch (error) {
+        console.error('could not retrieve commute info');
+        console.error(error);
       }
-      mapsPage.close();
-    } catch (error) {
-      console.error('could not retrieve commute info');
-      console.error(error);
     }
   }
+
   browser.close();
   return propertyInfo;
 }

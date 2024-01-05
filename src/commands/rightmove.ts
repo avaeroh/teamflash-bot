@@ -5,6 +5,8 @@ import { rejectInteraction } from '../utils/naughtyWordHelper';
 import { getRightMovePropertyInfo } from '../utils/browser/rightmove';
 import { getFormattedRightMoveInfo } from '../utils/browser/rightMoveStringUtils';
 
+const optionalLocationDescription =
+  '(Optional) Add a location to find commute distance from the property';
 const rightmove: ICommand = {
   data: new SlashCommandBuilder()
     .setName('rightmove')
@@ -12,14 +14,44 @@ const rightmove: ICommand = {
       option
         .setName('rightmoveurl')
         .setMinLength(1)
-
+        .setRequired(true)
         .setDescription('Your RightMove URL link')
+    )
+    .addStringOption((option1) =>
+      option1
+        .setName('location1')
+        .setDescription(optionalLocationDescription)
+        .setRequired(false)
+        .setMinLength(1)
+        .setMaxLength(50)
+    )
+    .addStringOption((option2) =>
+      option2
+        .setName('location2')
+        .setDescription(optionalLocationDescription)
+        .setRequired(false)
+        .setMinLength(1)
+        .setMaxLength(50)
+    )
+    .addStringOption((option3) =>
+      option3
+        .setName('location3')
+        .setDescription(optionalLocationDescription)
+        .setRequired(false)
+        .setMinLength(1)
+        .setMaxLength(50)
     )
     .setDescription(`Share a Rightmove URL & I'll get the important details`),
 
   async execute(interaction) {
     if (interaction.isChatInputCommand()) {
       const rightMoveUrl = interaction.options.getString('rightmoveurl');
+
+      const optionalLocations = [
+        interaction.options.getString('location1'),
+        interaction.options.getString('location2'),
+        interaction.options.getString('location3'),
+      ];
       console.log(
         `rightmove command called by '${interaction.member?.user.username}' searching for '${rightMoveUrl}'`
       );
@@ -38,7 +70,7 @@ const rightmove: ICommand = {
 
         let propertyInfo;
         try {
-          propertyInfo = await getRightMovePropertyInfo(rightMoveUrl);
+          propertyInfo = await getRightMovePropertyInfo(rightMoveUrl, optionalLocations);
 
           await interaction.followUp({
             content: `${await getFormattedRightMoveInfo(propertyInfo)}`,
