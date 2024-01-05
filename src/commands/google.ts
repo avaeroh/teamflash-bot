@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
-import { googleQuery } from '../utils/browserUi';
+import { googleQuery } from '../utils/browser/browserUtils';
 import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 
 const badWordsListRegex = require('badwords-list').regex;

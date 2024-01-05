@@ -12,6 +12,7 @@ const help: ICommand = {
     \n/play list | To list the songs currently in the queue.
     \n/play remove <Queue number> | To remove an item from the queue. Note: Removing the current playing song will not yet immediately terminate its play.
     \n/google | Return the top 10 Google searches.
+    \n/rightmove <Rightmove URL> | To quickly share information about a Rightmove property.
     \n/help | Literally this thing you're reading now.`,
       ephemeral: true,
     });

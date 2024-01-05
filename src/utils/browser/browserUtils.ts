@@ -1,5 +1,4 @@
 import playwright from 'playwright';
-import { sleep } from './debugHelper';
 
 export async function googleQuery(text: string) {
   const { page, browser } = await getPageAndBrowser();
@@ -80,8 +79,8 @@ export async function findYoutubeAudioByText(text: string) {
   return videoUrl;
 }
 
-async function getPageAndBrowser() {
-  const browser = await playwright['chromium'].launch({ headless: true });
+export async function getPageAndBrowser() {
+  const browser = await playwright['chromium'].launch({ headless: false });
   const context = await browser.newContext();
   const page = await context.newPage();
   return { page, browser };

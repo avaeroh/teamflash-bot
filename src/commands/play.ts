@@ -8,7 +8,7 @@ import ytdl, { validateURL } from 'ytdl-core';
 import { playNextSong } from '../utils/audio/youtubePlayer';
 import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
 import { AudioPlayerManager } from '../utils/audio/audioPlayerManager';
-import { findYoutubeAudioByText } from '../utils/browserUi';
+import { findYoutubeAudioByText } from '../utils/browser/browserUtils';
 import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 
 const playCommand: ICommand = {
