@@ -1,7 +1,7 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { ICommand } from '../interfaces/ICommand';
 import { googleQuery } from '../utils/browser/browserUtils';
-import { rejectInteraction } from '../utils/naughtyWordHelper';
+import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 import { getRightMovePropertyInfo } from '../utils/browser/rightmove';
 import { getFormattedRightMoveInfo } from '../utils/browser/rightMoveStringUtils';
 
@@ -69,6 +69,18 @@ const rightmove: ICommand = {
         }
 
         let propertyInfo;
+
+        //reject locations that are naughty words
+        for (const optionalLocation of optionalLocations) {
+          if (containsNaughtyWords(optionalLocation)) {
+            return rejectInteraction(
+              interaction,
+              rightMoveUrl,
+              `Please don't put naughty words in the location options options.`
+            );
+          }
+        }
+
         try {
           propertyInfo = await getRightMovePropertyInfo(rightMoveUrl, optionalLocations);
 

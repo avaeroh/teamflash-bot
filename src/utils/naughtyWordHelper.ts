@@ -2,7 +2,7 @@ import { CacheType, ChatInputCommandInteraction } from 'discord.js';
 
 const badWordsListRegex = require('badwords-list').regex;
 
-export function containsNaughtyWords(message: string): boolean {
+export function containsNaughtyWords(message: string | null): boolean {
   return badWordsListRegex.test(message);
 }
 
