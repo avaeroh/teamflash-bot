@@ -1,6 +1,5 @@
 import playwright from 'playwright';
 import { getPageAndBrowser } from './browserUtils';
-import { sleep } from '../debugHelper';
 
 const areasOfInterest = ['london bridge'];
 
@@ -8,7 +7,7 @@ export type PropertyInfo = {
   title?: string | undefined;
   price?: string | undefined;
   description: Description;
-  commute?: Commute;
+  commute?: Commute[];
 };
 type Commute = {
   location: string;
@@ -35,6 +34,7 @@ export async function getRightMovePropertyInfo(url: string) {
       bathrooms: undefined,
       size: undefined,
     },
+    commute: [{ location: 'London Bridge' }],
   };
 
   const rightMoveCookieModal = rightMovePage.locator('[id="onetrust-reject-all-handler"]');
@@ -75,7 +75,7 @@ export async function getRightMovePropertyInfo(url: string) {
     "//div[contains(@class, 'gm-iv-address-description')]"
   );
   await addressLocator.waitFor();
-  const propertyAddress = await addressLocator.textContent();
+  const propertyAddress = (await addressLocator.textContent())?.trim();
   //get commute info if address is available
   if (propertyAddress) {
     try {
@@ -89,7 +89,13 @@ export async function getRightMovePropertyInfo(url: string) {
         await rejectCookiesButton.click();
       }
       await mapsPage.locator("//button[contains(@aria-label, 'Directions')]").click();
-      propertyInfo.commute = await getCommuteInfo(mapsPage, propertyAddress, areasOfInterest[0]);
+      if (propertyInfo.commute) {
+        let commuteInfo: Commute[] = [];
+        for (const commute of propertyInfo.commute) {
+          commuteInfo.push(await getCommuteInfo(mapsPage, propertyAddress, commute.location));
+        }
+        propertyInfo.commute = commuteInfo;
+      }
       mapsPage.close();
     } catch (error) {
       console.error('could not retrieve commute info');
@@ -105,14 +111,10 @@ async function getCommuteInfo(
   fullAddress: string,
   areaOfInterest: string
 ): Promise<Commute> {
-  const fromDestinationLocator = mapsPage.locator(
-    "//input[contains(@aria-label, 'Choose starting point or click on the map...')]"
-  );
-  const toDestionationLocator = mapsPage.locator(
-    "//input[@aria-label='Choose destination or click on the map...']"
-  );
+  const fromDestinationLocator = mapsPage.locator("//div[@id='directions-searchbox-0'] //input");
+  const toDestionationLocator = mapsPage.locator("//div[@id='directions-searchbox-1'] //input");
 
-  await fromDestinationLocator.waitFor({ timeout: 2000 });
+  await fromDestinationLocator.waitFor();
   await fromDestinationLocator.fill(fullAddress);
   await mapsPage.keyboard.press('Enter');
   await toDestionationLocator.fill(areaOfInterest);
@@ -128,6 +130,9 @@ async function getCommuteInfo(
   const publicTransportDuration = await getDurationLocator(mapsPage, 'Public transport');
   const walkingDuration = await getDurationLocator(mapsPage, 'Walking');
   const cyclingDuration = await getDurationLocator(mapsPage, 'Cycling');
+  await fromDestinationLocator.clear();
+  await toDestionationLocator.clear();
+
   return {
     location: areaOfInterest,
     drivingDuration: await drivingDurationLocator.textContent(),
