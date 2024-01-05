@@ -1,11 +1,11 @@
 import playwright from 'playwright';
 import { getPageAndBrowser } from './browserUtils';
-
-const areasOfInterest = ['london bridge'];
+import { sleep } from '../debugHelper';
 
 export type PropertyInfo = {
   title?: string | undefined;
   price?: string | undefined;
+  internet?: string | undefined | null;
   description: Description;
   commute?: Commute[];
 };
@@ -34,7 +34,7 @@ export async function getRightMovePropertyInfo(url: string) {
       bathrooms: undefined,
       size: undefined,
     },
-    commute: [{ location: 'London Bridge' }],
+    commute: [{ location: 'London Bridge' }, { location: 'Victoria' }],
   };
 
   const rightMoveCookieModal = rightMovePage.locator('[id="onetrust-reject-all-handler"]');
@@ -45,10 +45,23 @@ export async function getRightMovePropertyInfo(url: string) {
     console.log('No cookies to reject');
   }
 
+  //basics
   propertyInfo.title = await rightMovePage.locator('h1').innerText();
   propertyInfo.price = await rightMovePage
     .locator("//article //span[text()[contains(.,'£')]]")
     .innerText();
+
+  //internet
+  await rightMovePage.locator("//div[@data-gtm-name='broadband-checker']").click();
+  const internetLocator = rightMovePage.locator(
+    "//div[@data-testid='DTbroadband-widget'] //div[@class] //div"
+  );
+  await internetLocator.first().waitFor();
+
+  propertyInfo.internet = (await internetLocator.allTextContents())
+    .filter((element) => !element.toLowerCase().includes('average download speed'))
+    .join(' - ')
+    .trim();
 
   //propety description
   propertyInfo.description.propertyType = await getPropertyDescription(
@@ -91,6 +104,7 @@ export async function getRightMovePropertyInfo(url: string) {
       await mapsPage.locator("//button[contains(@aria-label, 'Directions')]").click();
       if (propertyInfo.commute) {
         let commuteInfo: Commute[] = [];
+
         for (const commute of propertyInfo.commute) {
           commuteInfo.push(await getCommuteInfo(mapsPage, propertyAddress, commute.location));
         }
@@ -118,8 +132,13 @@ async function getCommuteInfo(
   await fromDestinationLocator.fill(fullAddress);
   await mapsPage.keyboard.press('Enter');
   await toDestionationLocator.fill(areaOfInterest);
-  //   await toDestionationLocator.fill(areaOfInterest);
   await mapsPage.keyboard.press('Enter');
+
+  if (await mapsPage.locator(`//h2[contains(text(), "Google Maps can't find")]`).isVisible()) {
+    return {
+      location: `Commute error: ${areaOfInterest}`,
+    };
+  }
   //wait for element that only appears when search completes
   await mapsPage.locator("//h1[@id='section-directions-trip-title-0']").waitFor({ timeout: 2000 });
 
@@ -130,11 +149,16 @@ async function getCommuteInfo(
   const publicTransportDuration = await getDurationLocator(mapsPage, 'Public transport');
   const walkingDuration = await getDurationLocator(mapsPage, 'Walking');
   const cyclingDuration = await getDurationLocator(mapsPage, 'Cycling');
+
+  //update location names to provide accurate feedback
+  const location = (await toDestionationLocator.getAttribute('aria-label'))?.split(
+    'Destination '
+  )[1];
   await fromDestinationLocator.clear();
   await toDestionationLocator.clear();
 
   return {
-    location: areaOfInterest,
+    location: location ?? areaOfInterest,
     drivingDuration: await drivingDurationLocator.textContent(),
     publicTransportDuration: await publicTransportDuration.textContent(),
     walkingDuration: await walkingDuration.textContent(),

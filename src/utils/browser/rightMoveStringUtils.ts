@@ -10,6 +10,7 @@ export async function getFormattedRightMoveInfo(propertyInfo: PropertyInfo) {
       Bedrooms: ${propertyInfo.description.bedrooms || 'Not specified'}
       Bathrooms: ${propertyInfo.description.bathrooms || 'Not specified'}
       Size: ${propertyInfo.description.size || 'Not specified'}
+      Internet: ${propertyInfo.internet || 'Not specified'}
     `;
 
   if (propertyInfo.commute && propertyInfo.commute.length > 0) {
