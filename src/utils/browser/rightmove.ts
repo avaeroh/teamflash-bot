@@ -1,7 +1,5 @@
 import playwright from 'playwright';
 import { getPageAndBrowser } from './browserUtils';
-import { sleep } from '../debugHelper';
-import { containsNaughtyWords } from '../naughtyWordHelper';
 
 export type PropertyInfo = {
   title?: string | undefined;

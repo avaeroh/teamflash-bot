@@ -80,7 +80,7 @@ export async function findYoutubeAudioByText(text: string) {
 }
 
 export async function getPageAndBrowser() {
-  const browser = await playwright['chromium'].launch({ headless: false });
+  const browser = await playwright['chromium'].launch({ headless: true });
   const context = await browser.newContext();
   const page = await context.newPage();
   return { page, browser };
