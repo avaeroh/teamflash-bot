@@ -115,7 +115,7 @@ export async function getRightMovePropertyInfo(url: string, optionalLocations: (
           }
           propertyInfo.commute = commuteInfo;
         }
-        mapsPage.close();
+        // mapsPage.close();
       } catch (error) {
         console.error('could not retrieve commute info');
         console.error(error);
