@@ -8,8 +8,8 @@ import ytdl, { validateURL } from 'ytdl-core';
 import { playNextSong } from '../utils/audio/youtubePlayer';
 import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
 import { AudioPlayerManager } from '../utils/audio/audioPlayerManager';
-import { findYoutubeAudioByText } from '../utils/browser/browserUtils';
 import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
+import { findYoutubeAudioByText } from '../utils/browser/browserUtils';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()
@@ -22,7 +22,9 @@ const playCommand: ICommand = {
         .addStringOption((option) =>
           option
             .setName('input')
-            .setDescription('The YouTube URL of the song you want to play')
+            .setDescription(
+              'The YouTube URL or search terms of the song you want to play. Adding URLs is faster!'
+            )
             .setRequired(true)
         )
     )
