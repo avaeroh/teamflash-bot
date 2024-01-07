@@ -10,6 +10,7 @@ import { ConnectionManager } from '../utils/audio/voiceConnectionManager';
 import { AudioPlayerManager } from '../utils/audio/audioPlayerManager';
 import { containsNaughtyWords, rejectInteraction } from '../utils/naughtyWordHelper';
 import { findYoutubeAudioByText } from '../utils/browser/browserUtils';
+import { canBotJoinChannelAndSpeak } from '../utils/audio/botAudioPermissions';
 
 const playCommand: ICommand = {
   data: new SlashCommandBuilder()
@@ -55,7 +56,14 @@ const playCommand: ICommand = {
 
         switch (subcommand) {
           case 'add':
-            await handleAddCommand(interaction);
+            if (canBotJoinChannelAndSpeak(interaction)) {
+              await handleAddCommand(interaction);
+            } else {
+              interaction.reply({
+                content: `I can't join an invalid channel, or one I don't have permission to view`,
+                ephemeral: true,
+              });
+            }
             break;
 
           case 'list':
