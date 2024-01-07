@@ -67,7 +67,7 @@ const rightmove: ICommand = {
         }
 
         //reject image links
-        if (rightMoveUrl.includes('id=media')) {
+        if (rightMoveUrl.includes('media')) {
           rejectInteraction(
             interaction,
             rightMoveUrl,
