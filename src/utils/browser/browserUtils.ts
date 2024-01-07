@@ -35,12 +35,13 @@ export async function googleQuery(text: string) {
   return combined;
 }
 
-export async function findYoutubeAudioByText(text: string) {
+export async function findYoutubeAudioByText(text: string): Promise<string | undefined> {
   let videoUrl;
   try {
     text = text.replace(/ /g, '+');
     const { page, browser } = await getPageAndBrowser();
     const rejectCookies = page.getByLabel('Reject the use of cookies and');
+
     const videosTab = page.getByRole('tab', { name: 'Videos' });
 
     const youtubeBaseUrl = 'https://www.youtube.com';
@@ -54,17 +55,26 @@ export async function findYoutubeAudioByText(text: string) {
       console.log('No cookies to reject');
     }
 
-    if (!(await videosTab.isVisible())) {
-      browser.close();
-      return undefined;
+    //try to click videos tab in the first instance, but if it doesn't exist, just continue
+    try {
+      await videosTab.waitFor({ timeout: 2000 });
+      await videosTab.click();
+    } catch (error) {
+      console.log('No videos tab to click');
     }
 
-    await videosTab.click();
-    await page.waitForLoadState();
-    const path = await page
-      .locator("//*[@id='page-manager'] //*[@id='thumbnail']")
-      .first()
-      .getAttribute('href');
+    const videoUrlLocator = page.locator("//*[@id='page-manager'] //*[@id='thumbnail']").first();
+
+    try {
+      videoUrlLocator.waitFor({ timeout: 2000 });
+    } catch (error) {
+      console.error('No video found');
+      return;
+    }
+
+    const path = await videoUrlLocator.getAttribute('href');
+    console.log(`Video href: ${path}`);
+
     if (path) {
       videoUrl = youtubeBaseUrl + path;
     } else {
