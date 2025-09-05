@@ -35,7 +35,7 @@ services:
         condition: service_healthy
 
   playwright:
-    image: mcr.microsoft.com/playwright:v1.46.1-jammy
+    image: mcr.microsoft.com/playwright:v1.55.0-jammy
     container_name: playwright
     command: ["npx","playwright","run-server","--port=8123"]
     ports:

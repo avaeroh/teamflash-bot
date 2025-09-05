@@ -1,4 +1,4 @@
-import playwright from 'playwright';
+import playwright from 'playwright-core';
 import { getPageAndBrowser } from './browserUtils';
 import { sleep } from '../debugHelper';
 
