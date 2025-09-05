@@ -4,6 +4,7 @@ run `docker-compose up`. By default this includes:
     - teamflash-bot
     - MongoDB
     - MongoExpress
+    - playwright
 
 ### Running locally
 
@@ -15,7 +16,7 @@ You will need [ASDF]("https://asdf-vm.com/manage/configuration.html"), which man
 - configure your `.env` file based on OS (mostly just when using WSL, else hostnames are probably just probably localhost)
 - Structure:
   ```env
-    BOT_TOKEN=<token>
+  DISCORD_TOKEN=<token>
   CLIENT_ID=<id>
   MONGO_URI=mongodb://<localhost*>:27017
   ```
@@ -38,7 +39,7 @@ I'd guess `MONGO_URI=mongodb://localhost:27017` is fine?
 
 To test your bot and actually use it, you need to create its "profile" and invite it to a Discord server! The amazing [discord.js Guide](https://discordjs.guide/) explains it very well [here](https://discordjs.guide/preparations/setting-up-a-bot-application.html#creating-your-bot). Follow the steps on the page, then continue reading this guide!
 
-Once you have generated a token, head to the `.env` file and paste it after the `BOT_TOKEN=`. Additionally, provide your bot's client ID for the `CLIENT_ID` field. You can find this in the "General Information" section, on the menu to the left in the Discord Developer Portal.
+Once you have generated a token, head to the `.env` file and paste it after the `DISCORD_TOKEN=`. Additionally, provide your bot's client ID for the `CLIENT_ID` field. You can find this in the "General Information" section, on the menu to the left in the Discord Developer Portal.
 
 Finally, head to [this section](https://discordjs.guide/preparations/adding-your-bot-to-servers.html#bot-invite-links) to add the bot to your server!
 

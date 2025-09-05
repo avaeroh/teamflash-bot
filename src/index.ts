@@ -16,7 +16,7 @@ import { getRandomInt } from './utils/randomNumber';
     intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
   });
   connectDatabase();
-  await BOT.login(process.env.BOT_TOKEN);
+  await BOT.login(process.env.DISCORD_TOKEN);
 
   // The .on() syntax is used when we want the bot to listen to a certain event.
   // Here, we listen to the ready event, which happens when the Discord bot Client is ready.

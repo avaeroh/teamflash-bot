@@ -1,28 +1,43 @@
-FROM node:21
+# syntax=docker/dockerfile:1
 
-ENV NODE_ENV=production
-
+########################
+# Builder: compilers + dev deps
+########################
+FROM node:20-bookworm-slim AS builder
 WORKDIR /app
-RUN chown -R node:node /app
-COPY --chown=node:node . .
 
-RUN npm install typescript -g
+# Toolchain for native addons (@discordjs/opus etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 make g++ pkg-config libopus-dev \
+ && rm -rf /var/lib/apt/lists/*
+ENV npm_config_python=/usr/bin/python3
 
-USER node
+# Install deps (prod + dev)
+COPY package*.json ./
+RUN npm ci
 
-COPY ["package.json", "package-lock.json*", "./"]
+# Copy source and build (force output to dist/)
+COPY . .
+RUN npx tsc -p . --outDir dist
 
-RUN npm run build &&\
-    npm run deploy
+# Prune to production deps
+RUN npm prune --omit=dev
 
-# Playwright Installation #
-RUN npx playwright install
+########################
+# Runtime: small, only what we need
+########################
+FROM node:20-bookworm-slim AS runtime
+ENV NODE_ENV=production
+WORKDIR /app
 
-## Temporarily switch to root for installing dependencies
-USER root
-RUN npx playwright install-deps
+# Runtime libs for audio
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libopus0 ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
 
-## Switch back to a non-root user for running the application
-USER node
+# Copy pruned node_modules, package files, and compiled JS
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package*.json ./
+COPY --from=builder /app/dist ./dist
 
-CMD ["npm", "start"]
+CMD ["node", "dist/index.js"]

@@ -1,43 +1,71 @@
-version: '3.1'
+version: "3.8"
 
 services:
   db:
     container_name: mongoDB
-    image: ${MONGODB_IMAGE:-mongo:4.2.1}
+    image: ${MONGODB_IMAGE:-mongo:6.0}
     restart: always
     volumes:
-      - ./data:${HOME}/data/db
+      - ./data:/data/db
     environment:
       - MONGO_INITDB_DATABASE=numberwang
     ports:
-      - 27017:27017
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   mongo-express:
-    image: ${MONGOEXPRESS_IMAGE:-mongo-express}
+    image: ${MONGOEXPRESS_IMAGE:-mongo-express:latest}
     container_name: mexpress
     environment:
-      - ME_CONFIG_MONGODB_URL=${MONGO_URI:-mongodb://localhost:27017}
+      - ME_CONFIG_MONGODB_URL=${MONGO_URI:-mongodb://db:27017}
       - ME_CONFIG_BASICAUTH_USERNAME=mexpress
       - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
-    links:
-      - db
     restart: unless-stopped
     ports:
-      - '8081:8081'
+      - "8081:8081"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.46.1-jammy
+    container_name: playwright
+    command: ["npx","playwright","run-server","--port=8123"]
+    ports:
+      - "8123:8123"
+    shm_size: "1gb"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8123/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
   teamflash-bot:
     container_name: teamflash-bot
     build:
       context: .
-      dockerfile: ${ARMDockerfile:-Dockerfile}
+      dockerfile: Dockerfile
     restart: unless-stopped
-    ports:
-      - '3000:3000'
     depends_on:
-      - db
-    links:
-      - db
-volumes:
-  data:
+      db:
+        condition: service_healthy
+      playwright:
+        condition: service_healthy
+    environment:
+      - DISCORD_TOKEN=${DISCORD_TOKEN}
+      - MONGO_URI=${MONGO_URI:-mongodb://db:27017/numberwang}
+      - NODE_ENV=production
+      - PLAYWRIGHT_WS=ws://playwright:8123/
+    healthcheck:
+      test: ["CMD-SHELL", "pgrep -f 'node dist/index.js' || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s

@@ -1,0 +1,11 @@
+node_modules
+npm-debug.log
+docker-compose.yml.bak
+Dockerfile.bak
+ARMDockerfile.bak
+data
+.git
+.gitignore
+# allow dist from builder only
+dist
+.vscode
