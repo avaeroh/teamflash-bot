@@ -21,10 +21,12 @@ services:
   mongo-express:
     image: ${MONGOEXPRESS_IMAGE:-mongo-express:latest}
     container_name: mexpress
+    env_file:
+      - .env
     environment:
-      - ME_CONFIG_MONGODB_URL=${MONGO_URI:-mongodb://db:27017}
-      - ME_CONFIG_BASICAUTH_USERNAME=mexpress
-      - ME_CONFIG_BASICAUTH_PASSWORD=mexpress
+      - ME_CONFIG_MONGODB_URL
+      - ME_CONFIG_BASICAUTH_USERNAME
+      - ME_CONFIG_BASICAUTH_PASSWORD
     restart: unless-stopped
     ports:
       - "8081:8081"
@@ -58,13 +60,12 @@ services:
         condition: service_healthy
       playwright:
         condition: service_healthy
-    environment:
-      - DISCORD_TOKEN=${DISCORD_TOKEN}
-      - MONGO_URI=${MONGO_URI:-mongodb://db:27017/numberwang}
-      - NODE_ENV=production
-      - PLAYWRIGHT_WS=ws://playwright:8123/
+    # Mount host .env so your code's `dotenv.config()` reads it
+    volumes:
+      - ./.env:/app/.env:ro
+    # Keep the bot "alive" even if the token is missing (see our entrypoint)
     healthcheck:
-      test: ["CMD-SHELL", "pgrep -f 'node dist/index.js' || exit 1"]
+      test: ["CMD-SHELL", "kill -0 1"]
       interval: 30s
       timeout: 10s
       retries: 3

@@ -40,4 +40,5 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/dist ./dist
 
-CMD ["node", "dist/index.js"]
+ENV DOTENV_CONFIG_PATH=/app/.env
+CMD ["node","-r","dotenv/config","dist/index.js"]
