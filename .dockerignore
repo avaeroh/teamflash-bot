@@ -1,11 +1,10 @@
 node_modules
-npm-debug.log
-docker-compose.yml.bak
-Dockerfile.bak
-ARMDockerfile.bak
-data
+build
+dist
 .git
 .gitignore
-# allow dist from builder only
-dist
-.vscode
+Dockerfile.bak
+docker-compose.yml.bak
+data
+*.log
+npm-debug.log*

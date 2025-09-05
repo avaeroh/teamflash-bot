@@ -60,12 +60,10 @@ services:
         condition: service_healthy
       playwright:
         condition: service_healthy
-    # Mount host .env so your code's `dotenv.config()` reads it
     volumes:
       - ./.env:/app/.env:ro
-    # Keep the bot "alive" even if the token is missing (see our entrypoint)
     healthcheck:
-      test: ["CMD-SHELL", "kill -0 1"]
+      test: ["CMD-SHELL", "pgrep -f 'node index.js' || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 3

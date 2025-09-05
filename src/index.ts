@@ -9,6 +9,7 @@ import { UserId } from './utils/userIdEnums';
 import { getRandomInt } from './utils/randomNumber';
 
 (async () => {
+  
   if (!validateEnv()) return;
   // We create the bot object, and login to Discord's servers with the bot token provided
   // in .env.

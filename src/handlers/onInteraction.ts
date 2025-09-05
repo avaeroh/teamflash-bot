@@ -21,9 +21,10 @@ export const onInteraction = async (interaction: Interaction) => {
  * If it exists, it runs the "execute" command, defined in the file
  * corresponding to the user's inputted command.
  */
+import path from 'path';
 const handleCommand = (interaction: CommandInteraction) => {
   const commandFiles: string[] = fs
-    .readdirSync('build/commands')
+    .readdirSync(path.resolve(__dirname, '../commands'))
     .filter((file) => file.endsWith('.js'));
 
   for (const file of commandFiles) {

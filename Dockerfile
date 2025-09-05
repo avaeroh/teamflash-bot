@@ -1,44 +1,44 @@
 # syntax=docker/dockerfile:1
 
 ########################
-# Builder: compilers + dev deps
+# Builder
 ########################
 FROM node:20-bookworm-slim AS builder
 WORKDIR /app
 
-# Toolchain for native addons (@discordjs/opus etc.)
+# toolchain for native addons used by @discordjs/opus, etc.
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 make g++ pkg-config libopus-dev \
  && rm -rf /var/lib/apt/lists/*
 ENV npm_config_python=/usr/bin/python3
 
-# Install deps (prod + dev)
+# install deps (simple & deterministic enough for our use case)
 COPY package*.json ./
-RUN npm ci
+RUN npm install --no-audit --no-fund
 
-# Copy source and build (force output to dist/)
+# compile TypeScript -> build/
 COPY . .
-RUN npx tsc -p . --outDir dist
+RUN npx tsc -p .
 
-# Prune to production deps
+# prune to production deps
 RUN npm prune --omit=dev
 
 ########################
-# Runtime: small, only what we need
+# Runtime
 ########################
 FROM node:20-bookworm-slim AS runtime
 ENV NODE_ENV=production
 WORKDIR /app
 
-# Runtime libs for audio
+# runtime libs for audio
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libopus0 ffmpeg \
  && rm -rf /var/lib/apt/lists/*
 
-# Copy pruned node_modules, package files, and compiled JS
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
+# copy ONLY what we need (keep node_modules as a directory!)
+COPY --chown=node:node package*.json ./
+COPY --from=builder --chown=node:node /app/node_modules ./node_modules
+COPY --from=builder --chown=node:node /app/build ./build
 
-ENV DOTENV_CONFIG_PATH=/app/.env
-CMD ["node","-r","dotenv/config","dist/index.js"]
+USER node
+CMD ["npm", "start"]
