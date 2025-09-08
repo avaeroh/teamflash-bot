@@ -13,7 +13,8 @@ const help: ICommand = {
     \n/play remove <Queue number> | To remove an item from the queue. Note: Removing the current playing song will not yet immediately terminate its play.
     \n/google | Return the top 10 Google searches.
     \n/rightmove <Rightmove URL> <<<Up To Three Optional Locations>>> | To quickly see information on a rightmove property.
-    \n/help | Literally this thing you're reading now.`,
+    \n/help | Literally this thing you're reading now.
+    \n ~ This app is in active development, so even the above may not work! Don't hate the player hate the game ~`,
       ephemeral: true,
     });
   },

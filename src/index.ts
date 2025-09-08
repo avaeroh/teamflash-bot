@@ -7,6 +7,7 @@ import { informSam } from './utils/samsPornstarRanking';
 
 import { UserId } from './utils/userIdEnums';
 import { getRandomInt } from './utils/randomNumber';
+import { log } from 'console';
 
 (async () => {
   
@@ -53,10 +54,6 @@ import { getRandomInt } from './utils/randomNumber';
     if (
       // if a user has just joined or switched to a voice channel
       USER_JOINED
-      // ||
-      // USER_SWITCHED
-      // // and the new voice channel is the same as the support channel
-      // newState.channel.id === VIBE_CHANNEL_ID
     ) {
       try {
         let channel = <TextChannel>await BOT.channels.fetch(ANNOUNCEMENTS_CHANNEL_ID);
